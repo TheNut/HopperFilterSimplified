@@ -1,4 +1,6 @@
 Changelog
+    Version 0.4 2013-08-30
+        - Cleaned up some code to that was causing an error
     Version 0.3 2013-08-28
         - Added ability to find chests and items inside the chest
         - Added additional debug items related to chests.  See v0.2 for complete list
