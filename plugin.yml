@@ -1,0 +1,36 @@
+name: HopperFilterSimplified
+version: 0.3
+description: This allows you to put an ItemFrame with an Item on a hopper or a Chest with items 
+             inside next to a hopper and only item(s) included are what the Hopper will accept.
+author: The_Nut
+website: http://dev.bukkit.org/bukkit-plugins/
+main: ws.kristensen.HopperFilterSimplified.HopperFilterSimplified
+
+commands:
+  hopperfiltersimplified:
+    description: Control what hoppers can have pushed into them from other hoppers or pulled into them.
+    aliases: hfs
+    permission: hopperfiltersimplified
+    usage: |
+        /hfs allowchestfilters <true|false> - Allow or deny the use of chests as a source for hopper filter information server wide.
+            Same as hfsallowchestfilters below.
+        /hfs debug <0|1|2|3|4> - Set the debug level.  See readme.txt for list of what is output at each level.
+            Same as hfsdebug below.
+        /hfs clearcache - Clears all hopper filter cache.  The cache will slowly be rebuilt as items are pushed/pulled into the hopper.
+            Same as hfsclearcache below.
+  hopperfiltersimplifiedallowchestfilters:
+    description: Sets if chests are allowed to be used to hold items for the filters in addition to item frames.
+    aliases: hfsallowchestfilters
+    permission: hopperfiltersimplified.setchestfilter
+    usage: /<command> <true/false>
+  hopperfiltersimplifiedclearcache:
+    description: Will clear the hopper filter cache. Cache will be automatically recreated as items move through the hoppers.
+    aliases: hfsclearcache
+    permission: hopperfiltersimplified.clearcache
+    usage: /<command>
+  hopperfiltersimplifieddebug:
+    description: Sets the debug level in the system log. Values are from 0 - 4.  The higher the number the more verbose the debug.
+    aliases: hfsdebug
+    permission: hopperfiltersimplified.setdebuglevel
+    usage: /<command> <debugLevel (0-4)>
+    
