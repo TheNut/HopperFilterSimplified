@@ -28,7 +28,6 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
-import org.bukkit.block.Hopper;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -110,12 +109,6 @@ public final class HopperFilterSimplified extends JavaPlugin {
      * @return String representing the cache for the hopper
      */
     protected String knownHoppersCache_Get(final Block hopperBlock) {
-        if (!(hopperBlock instanceof Hopper)) {
-            //invalid block
-            this.sendMessageWarning(null, "Block must be of type a Hopper to get cache. Location: (" + hopperBlock.getLocation().toString() + ")");
-            return "-=+*{ This is not a valid cache request. }*+=-";
-        }
-        
         Location hopperLocation = hopperBlock.getLocation();
         //try to get the cache
         if (knownHoppersCache.containsKey(hopperLocation)) {
@@ -149,12 +142,6 @@ public final class HopperFilterSimplified extends JavaPlugin {
      * @return boolean true of set was allowed, false otherwise.
      */
     protected boolean knownHoppersCache_Set(final Location hopperLocation, final String cache) {
-        //check to see if the location is a hopper
-        if(!(hopperLocation.getWorld().getBlockAt(hopperLocation) instanceof Hopper)) {
-            //invalid block
-            this.sendMessageWarning(null, "Block must be of type a Hopper to set cache. Location: (" + hopperLocation.toString() + ")");
-            return false;
-        }
         //Add the new cache item replacing the value if it already exists
         knownHoppersCache.put(hopperLocation, cache);
         return true;
