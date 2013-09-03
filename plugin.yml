@@ -1,5 +1,5 @@
 name: HopperFilterSimplified
-version: 0.4
+version: 0.5
 description: This allows you to put an ItemFrame with an Item on a hopper or a Chest with items 
              inside next to a hopper and only item(s) included are what the Hopper will accept.
 author: The_Nut

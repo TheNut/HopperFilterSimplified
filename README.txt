@@ -1,4 +1,8 @@
-Changelog
+Changelog:
+    Version 0.5 2013-09-03
+        - Fixed minor bug in cache handling where breaking and replacing an itemFrame with an item inside would not reset the cache for the affected hopper.
+        - Added debug item : 2 - Notification that cache entry for given hopper (location) was cleared.
+        - Added debug item : 2 - Notification that cache entry for all hoppers were cleared.
     Version 0.4 2013-08-30
         - Cleaned up some code to that was causing an error
     Version 0.3 2013-08-28
@@ -16,21 +20,27 @@ Changelog
         - Added cache to reduce load on servers.
             Cache builds automatically and on the first push/pull attempt into each destination hopper.
         - Added ClearCache command to reset cache.
-        - Added debug capabilities
-          level     What is displayed at given level and in what order
-            0       no debug reporting
-              2       Cache for a given hopper (location) if it exists in cache
-              2       Notification that cache entry is being created for a given hopper (location) if it does not exist
-               3        Notification that we are looking for item frames
-                4         Notification that it found an attached item frame
-                4         Information about the item in the itemFrame if one was found
-               3        Notification that we are looking for chests
-                4         Notification as to what direction the hopper is facing (output direction to avoid looking for a chest there)
-                4         Notification that it found a chest N, S, E, or W of the hopper that is not being pushed into by the hopper
-                4         Information about each item in the chest if any are found
-              2       Displays generated cache
-             1      Notification of what item in in what filter (location) is compared against what cache
+        - Added debug capabilities - See Debug Output Levels section below
         - Added Debug command to allow setting of level from 0 to 4
         - Added debug entry into plugin.yml
     Version 0.1 2013-08-29
         Created plugin structure and basic layout
+        
+Debug Output Levels:
+    Below indicates what is output for a given debug level.  
+    It also shows the indentation that will happen in the logs.
+  level     What is displayed at given level and in what order
+    0       no debug reporting
+      2       Notification that cache entry for given hopper (location) was cleared.
+      2       Notification that cache entry for all hoppers were cleared.
+      2       Cache for a given hopper (location) if it exists in cache
+      2       Notification that cache entry is being created for a given hopper (location) if it does not exist
+       3        Notification that we are looking for item frames
+        4         Notification that it found an attached item frame
+        4         Information about the item in the itemFrame if one was found
+       3        Notification that we are looking for chests
+        4         Notification as to what direction the hopper is facing (output direction to avoid looking for a chest there)
+        4         Notification that it found a chest N, S, E, or W of the hopper that is not being pushed into by the hopper
+        4         Information about each item in the chest if any are found
+      2       Displays generated cache
+     1      Notification of what item in in what filter (location) is compared against what cache

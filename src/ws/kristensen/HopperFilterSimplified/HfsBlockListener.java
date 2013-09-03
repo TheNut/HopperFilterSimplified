@@ -55,13 +55,12 @@ public class HfsBlockListener implements Listener {
         if (event.getRightClicked() instanceof ItemFrame)  {
             //get the block it was attached to
             Location itemFrameLocation = event.getRightClicked().getLocation();
-            Block blockItemFrameWasAttachedTo = itemFrameLocation.getBlock().getRelative(((ItemFrame)event.getRightClicked()).getFacing());
 
             //debug if requested
             if (plugin.debugLevel_get() > 0) plugin.getLogger().info("ItemFrame altered at (" + itemFrameLocation.toString() + ")");
 
-            //an itemFrame was broken.  clear the cache of any hoppers around it.
-            plugin.knownHoppersCache_ClearLocation(blockItemFrameWasAttachedTo.getLocation());
+            //an itemFrame was added. Clear the cache from the hoppers around the frame.
+            plugin.knownHoppersCache_ClearAroundLocation(itemFrameLocation);
         }
     }
 
@@ -115,8 +114,8 @@ public class HfsBlockListener implements Listener {
                 //debug if requested
                 if (plugin.debugLevel_get() > 0) plugin.getLogger().info("ItemFrame placed at (" + event.getBlock().getLocation().toString() + ")");
 
-                //an itemFrame was added. Clear the hopper it was placed on.
-                plugin.knownHoppersCache_ClearLocation(event.getBlock().getLocation());                
+                //an itemFrame was added. Clear the cache from the hoppers around the frame.
+                plugin.knownHoppersCache_ClearAroundLocation(event.getBlock().getLocation());
             }
         }        
     }
@@ -132,13 +131,12 @@ public class HfsBlockListener implements Listener {
         if (event.getEntity() instanceof ItemFrame) {
             //get the block it was attached to
             Location itemFrameLocation = event.getEntity().getLocation();
-            Block blockItemFrameWasAttachedTo = event.getEntity().getWorld().getBlockAt(itemFrameLocation).getRelative(event.getEntity().getFacing());
 
             //debug if requested
             if (plugin.debugLevel_get() > 0) plugin.getLogger().info("ItemFrame broken at (" + itemFrameLocation.toString() + ")");
 
-            //an itemFrame was broken.  clear the cache of any hoppers around it.
-            plugin.knownHoppersCache_ClearLocation(blockItemFrameWasAttachedTo.getLocation());
+            //an itemFrame was broken. Clear the cache from the hoppers around the frame.
+            plugin.knownHoppersCache_ClearAroundLocation(itemFrameLocation);
         }
     }
     

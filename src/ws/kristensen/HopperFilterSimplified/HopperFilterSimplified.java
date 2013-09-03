@@ -153,6 +153,7 @@ public final class HopperFilterSimplified extends JavaPlugin {
      */    
     protected boolean knownHoppersCache_Clear() {
         knownHoppersCache.clear();
+        if (debugLevel > 1) getLogger().info("      Clearing cache for all hoppers.");
         return true;
     }
     /**
@@ -180,6 +181,8 @@ public final class HopperFilterSimplified extends JavaPlugin {
         String oldCacheValue = knownHoppersCache.remove(hopperLocation);
         if (oldCacheValue == null) {
             return false;
+        } else {
+            if (debugLevel > 1) getLogger().info("      Clearing cache for hopper (" + hopperLocation.toString() + ")");
         }
         return true;
     }
