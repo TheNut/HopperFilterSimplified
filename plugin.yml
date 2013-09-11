@@ -1,5 +1,5 @@
 name: HopperFilterSimplified
-version: 0.5
+version: 0.6
 description: This allows you to put an ItemFrame with an Item on a hopper or a Chest with items 
              inside next to a hopper and only item(s) included are what the Hopper will accept.
 author: The_Nut
@@ -11,6 +11,7 @@ commands:
     description: Control what hoppers can have pushed into them from other hoppers or pulled into them.
     aliases: hfs
     permission: hopperfiltersimplified
+    permission-message: You do not have <permission> permission needed to do that.
     usage: |
         /hfs allowchestfilters <true|false> - Allow or deny the use of chests as a source for hopper filter information server wide.
             Same as hfsallowchestfilters below.
@@ -22,15 +23,87 @@ commands:
     description: Sets if chests are allowed to be used to hold items for the filters in addition to item frames.
     aliases: hfsallowchestfilters
     permission: hopperfiltersimplified.setchestfilter
+    permission-message: You do not have <permission> permission needed to set that.
     usage: /<command> <true/false>
   hopperfiltersimplifiedclearcache:
     description: Will clear the hopper filter cache. Cache will be automatically recreated as items move through the hoppers.
     aliases: hfsclearcache
     permission: hopperfiltersimplified.clearcache
+    permission-message: You do not have <permission> permission needed to clear that.
     usage: /<command>
   hopperfiltersimplifieddebug:
     description: Sets the debug level in the system log. Values are from 0 - 4.  The higher the number the more verbose the debug.
     aliases: hfsdebug
     permission: hopperfiltersimplified.setdebuglevel
+    permission-message: You do not have <permission> permission needed to set that.
     usage: /<command> <debugLevel (0-4)>
-    
+
+permissions:
+  hopperfiltersimplified.*:
+    description: Gives access to all commands and build options
+    children:
+      hopperfiltersimplified.build: true
+      hopperfiltersimplified.clearcache: true
+      hopperfiltersimplified.setdebuglevel: true
+      hopperfiltersimplified.setchestfilter: true
+  hopperfiltersimplified.clearcache:
+    description: Gives access to allowing the global hopper filter cache to be cleared.
+    default: false
+  hopperfiltersimplified.setdebuglevel:
+    description: Gives access to the player to set the debug level for this plugin server wide.
+    default: false
+  hopperfiltersimplified.setchestfilter:
+    description: Gives access to the player to indicate if chests are allowed to be used to hold items for the filters in addition to item frames.
+    default: false
+
+  hopperfiltersimplified.build.*:
+    description: Gives access to the player to create and remove hopper filters by adding/removing itemFrames and chests next to hoppers. 
+    children:
+      hopperfiltersimplified.build.alter.*: true
+      hopperfiltersimplified.build.break.*: true
+      hopperfiltersimplified.build.place.*: true
+
+  hopperfiltersimplified.build.alter:
+    description: Allows chests and itemFrames that are next to hoppers to have their contents changed.
+    children:
+      hopperfiltersimplified.build.alter.chest: true
+      hopperfiltersimplified.build.alter.itemframe: true
+    default: false
+  hopperfiltersimplified.build.alter.chest:
+    description: Allows chests that are next to hoppers to have their contents changed.
+    default: false
+  hopperfiltersimplified.build.alter.itemframe:
+    description: Allows itemFrames that are next to hoppers to have their contents changed.
+    default: false
+
+  hopperfiltersimplified.build.break.*:
+    description: Gives access to the player to remove hopper filters by breaking itemFrames and chests next to hoppers.
+    children:
+      hopperfiltersimplified.build.break.chest: true
+      hopperfiltersimplified.build.break.hopper: true
+      hopperfiltersimplified.build.break.itemframe: true
+  hopperfiltersimplified.build.break.chest:
+    description: Gives access to the player to remove hopper filters by breaking chests next hoppers.
+    default: false
+  hopperfiltersimplified.build.break.hopper:
+    description: Gives access to the player to remove hopper filters by breaking hoppers.
+    default: false
+  hopperfiltersimplified.build.break.itemframe:
+    description: Gives access to the player to remove hopper filters by breaking itemFrames on hoppers.
+    default: false
+
+  hopperfiltersimplified.build.place.*:
+    description: Gives access to the player to create hopper filters by placing itemFrames and chests next to hoppers.
+    children:
+      hopperfiltersimplified.build.place.chest: true
+      hopperfiltersimplified.build.place.hopper: true
+      hopperfiltersimplified.build.place.itemframe: true
+  hopperfiltersimplified.build.place.chest:
+    description: Gives access to the player to create hopper filters by placing chests next hoppers.
+    default: false
+  hopperfiltersimplified.build.place.hopper:
+    description: Gives access to the player to remove hopper filters by placing hoppers.
+    default: false
+  hopperfiltersimplified.build.place.itemframe:
+    description: Gives access to the player to create hopper filters by placing itemFrames on hoppers.
+    default: false

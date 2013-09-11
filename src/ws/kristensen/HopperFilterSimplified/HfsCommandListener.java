@@ -22,17 +22,30 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * This class listens to and handles the commands:<br/>
+ * <br/> 
+ *      - hopperfiltersimplified<br/>
+ *      - hfs<br/>
+ * <br/>
+ * Upon a successful match, the routine redirects to the other classes that this shortcut represents.
+ * 
+ */
 public class HfsCommandListener implements CommandExecutor {
     private final HopperFilterSimplified plugin;
 
+    /**
+     * Constructor that is called when class is instantiated.
+     * 
+     * @param plugin HopperFilterSimplified class so we can point back to the base class at protected functions.
+     */
     public HfsCommandListener(HopperFilterSimplified plugin) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
         }
-
         this.plugin = plugin;
     }
-    
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player) {
@@ -42,20 +55,17 @@ public class HfsCommandListener implements CommandExecutor {
             }
         }
         if (args.length > 0) {
+            //capture the first argument so we know where to redirect
             String arg = args[0];
+            //strip the first argument from the array and pass on the rest
             args = java.util.Arrays.copyOfRange(args, 1, args.length);
-            if (arg.toLowerCase().equals("debug")) {
-                return plugin.clSetDebugLevel.onCommand(sender, command, label, args);
-            } else if (arg.toLowerCase().equals("allowchestfilters")) {
-                return plugin.clAllowChestFilters.onCommand(sender, command, label, args);
-            } else if (arg.toLowerCase().equals("debug")) {
-                return plugin.clSetDebugLevel.onCommand(sender, command, label, args);
-            }
-            plugin.sendMessageInfo(sender, "invalid command: " + arg);
-        } else {
-            plugin.sendMessageInfo(sender, "no command specified.");
+            //find the correct command to call
+                 if (arg.toLowerCase().equals("debug"))             { return plugin.clSetDebugLevel.onCommand(sender, command, label, args);     } 
+            else if (arg.toLowerCase().equals("allowchestfilters")) { return plugin.clAllowChestFilters.onCommand(sender, command, label, args); } 
+            else if (arg.toLowerCase().equals("clearcache"))        { return plugin.clClearCache.onCommand(sender, command, label, args);        }
         }
         
+        //command was not found, so return false so the usage from the plugin.yml is displayed.
         return false;
     }
 }

@@ -22,9 +22,25 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * This class listens to and handles the commands:<br/>
+ * <br/> 
+ *      - hopperfiltersimplifieddebug<br/>
+ *      - hfsdebug<br/>
+ * <br/>
+ * If a player issues the command, and they do not have permission, a message is displayed stating such.<br/>
+ * If 0, 1, 2, 3, or 4 was not supplied as a parameter, a message will displayed and a false returned so usage from plugin.yml is displayed as well.<br/>
+ * Upon a successful set, a message is displayed stating the flag was set to what they requested.
+ * 
+ */
 public class HfsCommandListenerSetDebugLevel implements CommandExecutor {
     private final HopperFilterSimplified plugin;
 
+    /**
+     * Constructor that is called when class is instantiated.
+     * 
+     * @param plugin HopperFilterSimplified class so we can point back to the base class at protected functions.
+     */
     public HfsCommandListenerSetDebugLevel(HopperFilterSimplified plugin) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
@@ -38,14 +54,22 @@ public class HfsCommandListenerSetDebugLevel implements CommandExecutor {
         if (sender instanceof Player) {
             Player player = (Player)sender;
             if (!player.hasPermission("hopperfiltersimplified.setdebuglevel")) {
+                plugin.sendMessageInfo(sender, "You do not have hopperfiltersimplified.setdebuglevel permission needed to set that.");
                 return true;
             }
         }
         
-        if (!plugin.debugLevel_set(args[0])) {
-            //set was unsuccessful
-            plugin.sendMessageInfo(sender, "Requested debug level of " + args[0] + " is invalid. Valid range: 0 - 4");
+        if (args.length == 0) {
+            plugin.sendMessageInfo(sender, "Required debug level was not included (0, 1, 2, 3, 4).");
             return false;
+        } else {
+            //try to set the flag and handle the response
+            if (!plugin.debugLevel_set(args[0])) {
+                //set was unsuccessful so return false so the usage from the plugin.yml is displayed.
+                return false;
+            } else {
+                plugin.sendMessageInfo(sender, "DebugLevel flag set to: " + args[0]);
+            }
         }
         return true;
     }

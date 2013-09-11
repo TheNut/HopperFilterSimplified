@@ -1,4 +1,16 @@
 Changelog:
+    Version 0.6 2013-09-13
+        - Removed use of mcstats.org because site is down and has not worked properly for a while.
+        - Added permissions to control the placing or breaking of chests or itemFrames next to hoppers.
+        - Added permissions to control the placing or breaking of hoppers that have or would have filters.
+        - Added permissions to control the altering of chests and itemframes that are part of hopper filters
+        - Added debug item : 1      Notification that an itemFrame was placed on a hopper
+        - Added debug item : 1      Notification that an itemFrame on a hopper was broken
+        - Added debug item : 1      Notification that an itemFrame on a hopper was altered
+        - Added debug item : 1      Notification that a chest was placed next to a hopper
+        - Added debug item : 1      Notification that a chest was broken next to a hopper
+        - Added debug item : 1      Notification that a chest next to hopper had its contents altered
+        - Added debug item : 1      Notification that a hopper was broken with a filter
     Version 0.5 2013-09-03
         - Fixed minor bug in cache handling where breaking and replacing an itemFrame with an item inside would not reset the cache for the affected hopper.
         - Added debug item : 2 - Notification that cache entry for given hopper (location) was cleared.
@@ -44,3 +56,10 @@ Debug Output Levels:
         4         Information about each item in the chest if any are found
       2       Displays generated cache
      1      Notification of what item in in what filter (location) is compared against what cache
+     1      Notification that an itemFrame was placed on a hopper
+     1      Notification that an itemFrame on a hopper was broken
+     1      Notification that an itemFrame on a hopper was altered
+     1      Notification that a chest was placed next to a hopper
+     1      Notification that a chest was broken next to a hopper
+     1      Notification that a chest next to hopper had its contents altered
+     1      Notification that a hopper with a filter was broken

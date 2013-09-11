@@ -18,13 +18,13 @@
 
 package ws.kristensen.HopperFilterSimplified;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
@@ -73,13 +73,6 @@ public final class HopperFilterSimplified extends JavaPlugin {
         getCommand("hopperfiltersimplifiedclearcache"       ).setExecutor(clClearCache       );
         getCommand("hopperfiltersimplifieddebug"            ).setExecutor(clSetDebugLevel    );
         
-        //Track the usage of this plugin with MCStats
-        try {
-            Metrics metrics = new Metrics(this);
-            metrics.start();
-        } catch (IOException e) {
-            // Failed to submit the stats :-(
-        }
     }
 
     /**
@@ -93,10 +86,16 @@ public final class HopperFilterSimplified extends JavaPlugin {
         this.saveConfig();
     }
 
+    /**
+     * Read the configuration file: Basic section
+     */
     private void settings_Basic_Read() {
         debugLevel = this.getConfig().getConfigurationSection(ConfigurationSectionName_Basic).getInt("DebugLevel");
         allowChestFilters = this.getConfig().getConfigurationSection(ConfigurationSectionName_Basic).getBoolean("AllowChestFilters");
     }
+    /**
+     * Write the configuration file: Basic section
+     */
     private void settings_Basic_Write() {
         this.getConfig().getConfigurationSection(ConfigurationSectionName_Basic).set("DebugLevel", debugLevel);
         this.getConfig().getConfigurationSection(ConfigurationSectionName_Basic).set("AllowChestFilters", allowChestFilters);
@@ -149,46 +148,81 @@ public final class HopperFilterSimplified extends JavaPlugin {
     /**
      * Clear the cache for all hoppers.
      * 
-     * @return boolean true if clear was successful, false otherwise
+     * @return boolean true if cache was cleared, false if cache was already empty.
      */    
     protected boolean knownHoppersCache_Clear() {
-        knownHoppersCache.clear();
         if (debugLevel > 1) getLogger().info("      Clearing cache for all hoppers.");
-        return true;
+
+        if (knownHoppersCache.isEmpty()) {
+            //The cache already empty
+            return false;            
+        } else {
+            //there is at least one entry, clear it.
+            knownHoppersCache.clear();
+            return true;
+        }
     }
     /**
-     * Clear the cache round a specific Location.
+     * Clear the cache at a specific Location and the 4 spots at the same height around the location. (N/S/E/W)
      * 
-     * @param hopperLocation Location of the cache to be cleared.
-     * @return boolean true if successful, false otherwise.
+     * @param hopperLocation Location of the center area to have the cache cleared.
+     * @return boolean true if at least one cache was cleared, false if no caches existed for location.
      */
     protected boolean knownHoppersCache_ClearAroundLocation(final Location hopperLocation) {
+        boolean returnValue = false;
         Block block = hopperLocation.getBlock();
 
-        knownHoppersCache_ClearLocation(block.getRelative( 1, 0, 0).getLocation());
-        knownHoppersCache_ClearLocation(block.getRelative( 0, 0, 1).getLocation());
-        knownHoppersCache_ClearLocation(block.getRelative(-1, 0, 0).getLocation());
-        knownHoppersCache_ClearLocation(block.getRelative( 0, 0,-1).getLocation());
-        return true;
+        if (knownHoppersCache_ClearLocation(block.getLocation()))                       { returnValue = true; }
+        if (knownHoppersCache_ClearLocation(block.getRelative( 1, 0, 0).getLocation())) { returnValue = true; }
+        if (knownHoppersCache_ClearLocation(block.getRelative( 0, 0, 1).getLocation())) { returnValue = true; }
+        if (knownHoppersCache_ClearLocation(block.getRelative(-1, 0, 0).getLocation())) { returnValue = true; }
+        if (knownHoppersCache_ClearLocation(block.getRelative( 0, 0,-1).getLocation())) { returnValue = true; }
+        
+        return returnValue;
     }
     /**
      * Clear the cache for a specific hopper.
      * 
      * @param hopperLocation Location of the cache to be cleared.
-     * @return boolean true if successful, false otherwise.
+     * @return boolean true if cache cleared, false if no cache existed.
      */
     protected boolean knownHoppersCache_ClearLocation(final Location hopperLocation) {
-        String oldCacheValue = knownHoppersCache.remove(hopperLocation);
-        if (oldCacheValue == null) {
-            return false;
+        if (knownHoppersCache_isFilter(hopperLocation)) {
+            if (debugLevel > 1) getLogger().info("      Cleared cache for hopper (" + hopperLocation.toString() + ")");
         } else {
-            if (debugLevel > 1) getLogger().info("      Clearing cache for hopper (" + hopperLocation.toString() + ")");
+            return false;
         }
         return true;
     }
+    /**
+     * Indicate if there is a hopper cache at a specific Location or the 4 spots at the same height around the location. (N/S/E/W)
+     * 
+     * @param hopperLocation Location of the center area to have the cache checked.
+     * @return boolean true if at least one cache exists, false if no caches exist for location or surrounding blocks.
+     */
+    protected boolean knownHoppersCache_isFilterAroundLocation(final Location hopperLocation) {
+        Block block = hopperLocation.getBlock();
+
+        if (knownHoppersCache_isFilter(block.getLocation()))                       { return true; }
+        if (knownHoppersCache_isFilter(block.getRelative( 1, 0, 0).getLocation())) { return true; }
+        if (knownHoppersCache_isFilter(block.getRelative( 0, 0, 1).getLocation())) { return true; }
+        if (knownHoppersCache_isFilter(block.getRelative(-1, 0, 0).getLocation())) { return true; }
+        if (knownHoppersCache_isFilter(block.getRelative( 0, 0,-1).getLocation())) { return true; }
+        //none found, so return false
+        return false;
+    }
+    /**
+     * Indicate if the supplied location is a hopper with a filter.
+     * 
+     * @param hopperLocation Location of the hopper to check
+     * @return boolean true if the filter exists, false otherwise
+     */
+    protected boolean knownHoppersCache_isFilter(final Location hopperLocation) {
+        return (knownHoppersCache.containsKey(hopperLocation));
+    }
 
     /**
-     * Gets the debug level.
+     * Gets the current debug level.
      * 
      * @return Integer debugLevel value
      */
@@ -198,7 +232,7 @@ public final class HopperFilterSimplified extends JavaPlugin {
     /**
      * Sets the debug level to a valid value.
      * 
-     * @param proposedDebugLevel a value between 0 and 4
+     * @param proposedDebugLevel String value between 0 and 4
      * @return boolean true if successful, false otherwise
      */
     protected boolean debugLevel_set(final String proposedLevel) {
@@ -226,14 +260,15 @@ public final class HopperFilterSimplified extends JavaPlugin {
     }
     
     /**
-     * Return the cache string representation of allowed blocks for a hopper.
+     * Return the newly constructed cache string representation of allowed blocks for a hopper.
      * 
-     * @param hopperBlock the hopper block in question.
+     * @param hopperBlock Block of the hopper in question.
      * @return String representing the cache of allowed items
      */
     private String ReturnAttachedAllowedItemsAsString (Block hopperBlock) {
         String returnValue = knownHoppersCacheDelimiter;
         HashMap<ItemStack, String> itemStackCache = new HashMap<ItemStack, String>();
+        
         //get the items from itemFrame objects attached to this hopper and adjacent chests that the hopper does not feed into.
         itemStackCache.putAll(ReturnAttachedAllowedItemsFromItemFrames(hopperBlock));
         if (allowChestFilters)
@@ -245,18 +280,17 @@ public final class HopperFilterSimplified extends JavaPlugin {
             returnValue += itemStackCache.get(key);
         }
 
-        //make sure the returned cache is two delimiters if no allowed items exist
+        //make sure the returned cache is empty string and not one delimiter if no allowed items exist
         if (returnValue.equals(knownHoppersCacheDelimiter))
             returnValue = "";
 
         //return the cache list as a string
         return returnValue;
     }
-
     /**
      * Find all the item frames within a 1 block radius of the hopper and return the item inside the frame.
      * 
-     * @param hopperBlock the hopper block in question.
+     * @param hopperBlock Block of the hopper in question.
      * @return HashMap<ItemStack, String> of the items in any attached frames.
      */
     private HashMap<ItemStack, String> ReturnAttachedAllowedItemsFromItemFrames(Block hopperBlock) {
@@ -265,25 +299,33 @@ public final class HopperFilterSimplified extends JavaPlugin {
         //declare return container
         HashMap<ItemStack, String> itemStackCache = new HashMap<ItemStack, String>();
         ItemStack itemStack = null;
+        //Look right next to the hopper and avoid the frames on another hopper  
         double radius = 0.45;
         
         //create an entity in the exact center of the block so we can find the surrounding attached entities.
-        //TODO: make sure this puts the location into the center of the block always. even if the physical location is (x,y), (x,-y), (-x,-y), (-x,y)    
         Entity entity = hopperBlock.getWorld().spawnEntity(hopperBlock.getLocation().add(0.5,0.5,0.5), EntityType.ARROW);
         //get all other entities in a radius around this entity not looking up or down. 
         List<Entity> entities = entity.getNearbyEntities(radius, 0, radius);
         //remove the temp entity
         entity.remove();
         
+        //loop through all the adjacent entities next the hopper
         for (Entity nearbyEntity : entities) {
+            //make sure they are an ItemFrame
             if (nearbyEntity instanceof ItemFrame) {
                 //deal with itemFrame
                 if (debugLevel > 3) getLogger().info("      Found attached item frame (" + ((ItemFrame)nearbyEntity).getLocation().toString() + ")");
+                //get the possible itemStack from the itemFrame
                 itemStack = ((ItemFrame) nearbyEntity).getItem();
+                //make sure there was something there
                 if (itemStack != null) {
                     //deal with itemStack
                     if (debugLevel > 3) getLogger().info("        Found item in frame (" + GetItemInformationForInventory(itemStack, false) + ")");
+
+                    //make sure the item amount is not taken into account
                     itemStack.setAmount(1);                    
+
+                    //Store it
                     itemStackCache.put(itemStack, GetItemInformationForInventory(itemStack, true));
                 }
             }  
@@ -291,7 +333,6 @@ public final class HopperFilterSimplified extends JavaPlugin {
         
         return itemStackCache;
     }
-
     /**
      * Find all the chests next to the hopper (not diagonal or above or below) that the hopper does not feed into and return the items inside the chest.
      * 
@@ -313,34 +354,46 @@ public final class HopperFilterSimplified extends JavaPlugin {
 
         target = hopperBlock.getRelative(BlockFace.NORTH);
         if (target.getState() instanceof Chest && facing != 0x2) {
+            //take a snapshot of the chest so we can use it later
             list.add((Chest)target.getState());
         }
         
         target = hopperBlock.getRelative(BlockFace.EAST);
         if (target.getState() instanceof Chest && facing != 0x5) {
+            //take a snapshot of the chest so we can use it later
             list.add((Chest)target.getState());
         }
         
         target = hopperBlock.getRelative(BlockFace.SOUTH);
         if (target.getState() instanceof Chest && facing != 0x3) {
+            //take a snapshot of the chest so we can use it later
             list.add((Chest)target.getState());
         }
         
         target = hopperBlock.getRelative(BlockFace.WEST);
         if (target.getState() instanceof Chest && facing != 0x4) {
+            //take a snapshot of the chest so we can use it later
             list.add((Chest)target.getState());
         }
 
+        //loop through all the adjacent chests not being fed into by the hopper
         for (Chest chest : list) {
             //deal with chest
             if (debugLevel > 3) getLogger().info("      Found attached chest (" + chest.getLocation().toString() + ")");
+            
             //get the stacks out of the chest
             ItemStack[] tempStacks = chest.getBlockInventory().getContents();
+            
+            //loop through all the item stacks in the chest
             for (ItemStack itemStack : tempStacks) {
                 if (itemStack != null) {
-                    //deal with itemStack
+                    //deal with the itemStack
                     if (debugLevel > 3) getLogger().info("        Found item in chest (" + GetItemInformationForInventory(itemStack, false) + ")");
+
+                    //make sure the item amount is not taken into account
                     itemStack.setAmount(1);
+                    
+                    //Store it
                     itemStackCache.put(itemStack, GetItemInformationForInventory(itemStack, true));
                 }
             }
@@ -354,7 +407,7 @@ public final class HopperFilterSimplified extends JavaPlugin {
      * 
      * @param item ItemStack that needs the information extracted 
      * @param forBuildingCache boolean indicating if the returned string is part of a cache being built up
-     * @return String containg the extracted information from the ItemStack
+     * @return String containing the extracted information from the ItemStack
      */
     protected String GetItemInformationForInventory(ItemStack item, boolean forBuildingCache) {
         String returnValue = "";
@@ -379,6 +432,106 @@ public final class HopperFilterSimplified extends JavaPlugin {
     }
 
     /**
+     * Indicate if the ChestLocation is next to a Hopper that it can be a filter for
+     * 
+     * @param chestLocation Location of the Chest in question
+     * @return boolean true if there is at least one hopper it can be a filter for
+     */
+    protected boolean isChestNextToHopper(final Location chestLocation) {
+        //get the Block of the Chest
+        Block chestBlock = chestLocation.getBlock();
+
+        //check each direction and see if there is a valid hopper for the chest to be a filter for
+        if (isChestValidForHopperFilter(chestBlock.getRelative(BlockFace.NORTH), BlockFace.SOUTH)) { return true;}
+        if (isChestValidForHopperFilter(chestBlock.getRelative(BlockFace.EAST),  BlockFace.WEST))  { return true;}
+        if (isChestValidForHopperFilter(chestBlock.getRelative(BlockFace.SOUTH), BlockFace.NORTH)) { return true;}
+        if (isChestValidForHopperFilter(chestBlock.getRelative(BlockFace.WEST),  BlockFace.EAST))  { return true;}
+
+        //The given chest is not next to a valid hopper
+        return false;
+    }
+    /**
+     * Indicate if the testBlock is a valid hopper for the chest to be a filter of
+     * 
+     * @param testBlock Block to determine if it is a hopper
+     * @param chestDirection BlockFace direction to the chest from the testBlock
+     * @return boolean true if the testBlock is a valid hopper for the chest to be a filter for
+     */    
+    private boolean isChestValidForHopperFilter(Block testBlock, BlockFace chestDirection) {
+        if (testBlock.getType().equals(Material.HOPPER)) {
+            byte testData = testBlock.getData();
+            if (testData == 0x2 && chestDirection == BlockFace.NORTH) { return false; } //Hopper is feeding into the chest
+            if (testData == 0x5 && chestDirection == BlockFace.EAST)  { return false; } //Hopper is feeding into the chest
+            if (testData == 0x3 && chestDirection == BlockFace.SOUTH) { return false; } //Hopper is feeding into the chest
+            if (testData == 0x4 && chestDirection == BlockFace.WEST)  { return false; } //Hopper is feeding into the chest
+            return true; // testBlock is a hopper and not feeding into the chest 
+        }
+        return false; //this testBlock is not a hopper
+    }
+
+    protected boolean isHopperPartOfFilter(final Location hopperLocation) {
+        //try the least expensive test first then progress to the more expensive tests
+        if (knownHoppersCache_isFilter(hopperLocation)) { return true; }
+        if (isHopperNextToChest(hopperLocation))        { return true; }
+        if (isHopperNextToItemFrame(hopperLocation))    { return true; }
+        return false;
+    }
+    /**
+     * Indicate if the hopper is next to a chest that can be part of its filter
+     * 
+     * @param hopperLocation Location of the hopper in question
+     * @return boolean true if there is a chest next to the hopper that can be part of its filter
+     */
+    protected boolean isHopperNextToChest(final Location hopperLocation) {
+        //get the block of the Hopper
+        Block hopperBlock = hopperLocation.getBlock();
+    
+        //Check each direction and see if there is a valid chest to be part of a filter.
+        if (hopperBlock.getData() != 0x2 &&
+            (hopperBlock.getRelative(BlockFace.NORTH).getType().equals(Material.CHEST) ||
+             hopperBlock.getRelative(BlockFace.NORTH).getType().equals(Material.TRAPPED_CHEST))
+           ) { return true; }
+        if (hopperBlock.getData() != 0x5 && 
+            (hopperBlock.getRelative(BlockFace.EAST).getType().equals(Material.CHEST) ||
+             hopperBlock.getRelative(BlockFace.EAST).getType().equals(Material.TRAPPED_CHEST))
+           ) { return true; }
+        if (hopperBlock.getData() != 0x3 && 
+            (hopperBlock.getRelative(BlockFace.SOUTH).getType().equals(Material.CHEST) ||
+             hopperBlock.getRelative(BlockFace.SOUTH).getType().equals(Material.TRAPPED_CHEST))
+           ) { return true; }
+        if (hopperBlock.getData() != 0x4 &&  
+            (hopperBlock.getRelative(BlockFace.WEST).getType().equals(Material.CHEST) ||
+             hopperBlock.getRelative(BlockFace.WEST).getType().equals(Material.TRAPPED_CHEST))
+           ) { return true; }
+
+        //The given hopper has no chests next to it
+        return false;
+    }
+    /**
+     * Indicate if the hopper is next to an itemFrame that can be part of its filter
+     * 
+     * @param hopperLocation Location of the hopper in question
+     * @return boolean true if there is an itemFrame next to the hopper that can be part of its filter
+     */
+    protected boolean isHopperNextToItemFrame(final Location hopperLocation) {
+        //Look right next to the hopper and avoid the frames on another hopper  
+        double radius = 0.45;
+        
+        //create an entity in the exact center of the block so we can find the surrounding attached entities.
+        Entity entity = hopperLocation.getBlock().getWorld().spawnEntity(hopperLocation.add(0.5,0.5,0.5), EntityType.ARROW);        
+        //get all other entities in a radius around this entity not looking up or down. 
+        List<Entity> entities = entity.getNearbyEntities(radius, 0, radius);
+        //remove the temp entity
+        entity.remove();
+
+        //loop through all the adjacent entities next the hopper
+        for (Entity nearbyEntity : entities) {
+            if (nearbyEntity instanceof ItemFrame) { return true; }  
+        }
+        return false;
+    }
+
+    /**
      * Sends a message of type info either to the console or the player, depending on the sender variable
      * 
      * @param sender CommandSender is either the player, or null for console.
@@ -392,7 +545,6 @@ public final class HopperFilterSimplified extends JavaPlugin {
             this.getLogger().info(msg);
         }
     }
-
     /**
      * Sends a message of type warning either to the console or the player, depending on the sender variable
      * 
