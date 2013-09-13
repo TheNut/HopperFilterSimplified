@@ -266,41 +266,45 @@ public class HfsBlockListener implements Listener {
         if (event.getRightClicked() instanceof ItemFrame)  {
             //get the block location of the ItemFrame
             Location itemFrameLocation = event.getRightClicked().getLocation();
+            //cast the right clicked on item into an itemFrame
+            ItemFrame itemFrame = (ItemFrame) event.getRightClicked();
             
-            ItemFrame test = (ItemFrame)(event.getRightClicked());
-            boolean isAir = test.getItem().getType().equals(Material.AIR);
-            
-            
-            if (event.getPlayer() instanceof Player) {
-                //check permissions setting
-                Player player = (Player)event.getPlayer();
+            //Make sure item frame is hung on a hopper
+            if (itemFrameLocation.getBlock().getRelative(itemFrame.getAttachedFace()).getType().equals(Material.HOPPER)) {
+                ItemFrame test = (ItemFrame)(event.getRightClicked());
+                boolean isAir = test.getItem().getType().equals(Material.AIR);
+                
+                if (event.getPlayer() instanceof Player) {
+                    //check permissions setting
+                    Player player = (Player)event.getPlayer();
 
-                if (isAir) {
-                    //nothing in the frame yet, check to see if they have rights to place.
-                    if (!player.hasPermission("hopperfiltersimplified.build.place.itemframe")) {
-                        plugin.sendMessageInfo(player, "You do not have rights to place an item in a hopper filter itemFrame.");
-                        event.setCancelled(true);
-                        return;
+                    if (isAir) {
+                        //nothing in the frame yet, check to see if they have rights to place.
+                        if (!player.hasPermission("hopperfiltersimplified.build.place.itemframe")) {
+                            plugin.sendMessageInfo(player, "You do not have rights to place an item in a hopper filter itemFrame.");
+                            event.setCancelled(true);
+                            return;
+                        }
+                    } else {
+                        // something is there. check to see if they have rights to alter.
+                        if (!player.hasPermission("hopperfiltersimplified.build.alter.itemframe")) {
+                            plugin.sendMessageInfo(player, "You do not have rights to alter a hopper filter itemFrame.");
+                            event.setCancelled(true);
+                            return;
+                        }                    
                     }
-                } else {
-                    // something is there. check to see if they have rights to alter.
-                    if (!player.hasPermission("hopperfiltersimplified.build.alter.itemframe")) {
-                        plugin.sendMessageInfo(player, "You do not have rights to alter a hopper filter itemFrame.");
-                        event.setCancelled(true);
-                        return;
-                    }                    
                 }
-            }
-            
-            //debug if requested
-            if (isAir) {
-                if (plugin.debugLevel_get() > 0) plugin.getLogger().info("ItemFrame filter created at (" + itemFrameLocation.toString() + ")");
-            } else {
-                if (plugin.debugLevel_get() > 0) plugin.getLogger().info("ItemFrame altered at (" + itemFrameLocation.toString() + ")");
-            }
+                
+                //debug if requested
+                if (isAir) {
+                    if (plugin.debugLevel_get() > 0) plugin.getLogger().info("ItemFrame filter created at (" + itemFrameLocation.toString() + ")");
+                } else {
+                    if (plugin.debugLevel_get() > 0) plugin.getLogger().info("ItemFrame altered at (" + itemFrameLocation.toString() + ")");
+                }
 
-            //an itemFrame was added. Clear the cache from the hoppers around the frame.
-            plugin.knownHoppersCache_ClearAroundLocation(itemFrameLocation);
+                //an itemFrame was added. Clear the cache from the hoppers around the frame.
+                plugin.knownHoppersCache_ClearAroundLocation(itemFrameLocation);
+            }
         }
     }
 

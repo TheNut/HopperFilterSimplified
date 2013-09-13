@@ -1,5 +1,9 @@
 Changelog:
-    Version 0.6 2013-09-13
+    Version 0.7 2013-09-13
+        - Compiled against CB 1.6.2-R1.0
+        - Fixed bug where a person without rights to hopperfiltersimplified.build.place.itemframe could not place an item in any ItemFrame.
+            It is now restricted to only item frames attached to hoppers. 
+    Version 0.6 2013-09-11
         - Removed use of mcstats.org because site is down and has not worked properly for a while.
         - Added permissions to control the placing or breaking of chests or itemFrames next to hoppers.
         - Added permissions to control the placing or breaking of hoppers that have or would have filters.

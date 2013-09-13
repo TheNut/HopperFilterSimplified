@@ -303,7 +303,7 @@ public final class HopperFilterSimplified extends JavaPlugin {
         double radius = 0.45;
         
         //create an entity in the exact center of the block so we can find the surrounding attached entities.
-        Entity entity = hopperBlock.getWorld().spawnEntity(hopperBlock.getLocation().add(0.5,0.5,0.5), EntityType.ARROW);
+        Entity entity = hopperBlock.getWorld().spawnEntity(hopperBlock.getLocation().add(0.5,0.5,0.5), EntityType.EXPERIENCE_ORB);
         //get all other entities in a radius around this entity not looking up or down. 
         List<Entity> entities = entity.getNearbyEntities(radius, 0, radius);
         //remove the temp entity
@@ -339,6 +339,7 @@ public final class HopperFilterSimplified extends JavaPlugin {
      * @param hopperBlock the hopper block in question.
      * @return HashMap<ItemStack, String> of the items in any adjacent chests not being fed by the hopper.
      */
+    @SuppressWarnings("deprecation")
     private HashMap<ItemStack, String> ReturnAttachedAllowedItemsFromChests(Block hopperBlock) {
         if (debugLevel > 2) getLogger().info("    Finding chests attached to hopper.");
         
@@ -457,6 +458,7 @@ public final class HopperFilterSimplified extends JavaPlugin {
      * @param chestDirection BlockFace direction to the chest from the testBlock
      * @return boolean true if the testBlock is a valid hopper for the chest to be a filter for
      */    
+    @SuppressWarnings("deprecation")
     private boolean isChestValidForHopperFilter(Block testBlock, BlockFace chestDirection) {
         if (testBlock.getType().equals(Material.HOPPER)) {
             byte testData = testBlock.getData();
@@ -482,24 +484,26 @@ public final class HopperFilterSimplified extends JavaPlugin {
      * @param hopperLocation Location of the hopper in question
      * @return boolean true if there is a chest next to the hopper that can be part of its filter
      */
+    @SuppressWarnings("deprecation")
     protected boolean isHopperNextToChest(final Location hopperLocation) {
         //get the block of the Hopper
         Block hopperBlock = hopperLocation.getBlock();
+        byte directionData = hopperBlock.getData();
     
         //Check each direction and see if there is a valid chest to be part of a filter.
-        if (hopperBlock.getData() != 0x2 &&
+        if (directionData != 0x2 &&
             (hopperBlock.getRelative(BlockFace.NORTH).getType().equals(Material.CHEST) ||
              hopperBlock.getRelative(BlockFace.NORTH).getType().equals(Material.TRAPPED_CHEST))
            ) { return true; }
-        if (hopperBlock.getData() != 0x5 && 
+        if (directionData != 0x5 && 
             (hopperBlock.getRelative(BlockFace.EAST).getType().equals(Material.CHEST) ||
              hopperBlock.getRelative(BlockFace.EAST).getType().equals(Material.TRAPPED_CHEST))
            ) { return true; }
-        if (hopperBlock.getData() != 0x3 && 
+        if (directionData != 0x3 && 
             (hopperBlock.getRelative(BlockFace.SOUTH).getType().equals(Material.CHEST) ||
              hopperBlock.getRelative(BlockFace.SOUTH).getType().equals(Material.TRAPPED_CHEST))
            ) { return true; }
-        if (hopperBlock.getData() != 0x4 &&  
+        if (directionData != 0x4 &&  
             (hopperBlock.getRelative(BlockFace.WEST).getType().equals(Material.CHEST) ||
              hopperBlock.getRelative(BlockFace.WEST).getType().equals(Material.TRAPPED_CHEST))
            ) { return true; }
@@ -518,7 +522,7 @@ public final class HopperFilterSimplified extends JavaPlugin {
         double radius = 0.45;
         
         //create an entity in the exact center of the block so we can find the surrounding attached entities.
-        Entity entity = hopperLocation.getBlock().getWorld().spawnEntity(hopperLocation.add(0.5,0.5,0.5), EntityType.ARROW);        
+        Entity entity = hopperLocation.getBlock().getWorld().spawnEntity(hopperLocation.add(0.5,0.5,0.5), EntityType.EXPERIENCE_ORB);        
         //get all other entities in a radius around this entity not looking up or down. 
         List<Entity> entities = entity.getNearbyEntities(radius, 0, radius);
         //remove the temp entity
